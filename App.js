@@ -7,21 +7,29 @@ import Recent_Expenses from './screens/Recent_Expenses';
 import All_Expenses from './screens/All_Expenses';
 import { GlobalStyles } from './cosntants/GlobalStyles';
 import { FontAwesome5 } from '@expo/vector-icons';
+import {useFonts} from 'expo-font';
+import AppLoading from 'expo-app-loading';
+import IconButton from './components/UI/IconButton';
+import ExpensesContext_Provider from './store/Expenses_Context';
 
 const Stack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator();
 
+
 function TabSelector(){
   return(
-    <BottomTab.Navigator screenOptions={
-      {
+    <BottomTab.Navigator 
+      screenOptions={({navigation}) => ({
         headerStyle:{
-          backgroundColor:GlobalStyles.colors.accent500},
+          backgroundColor:GlobalStyles.COLORS.PRIMARY400},
           headerTintColor:'white',
         tabBarStyle:{
-          backgroundColor:GlobalStyles.colors.accent500},
-          tabBarActiveTintColor:GlobalStyles.colors.primary700}
-    }>
+          backgroundColor:GlobalStyles.COLORS.PRIMARY400},
+          tabBarActiveTintColor:GlobalStyles.COLORS.ACCENT500,
+        headerRight:({tintColor}) => (<IconButton icon='add'
+           color={tintColor} size={24}  buttonPress={() => {navigation.navigate('Manage expense')}}/>)
+        })}
+    >
       <BottomTab.Screen name='Recent expenses' component={Recent_Expenses} 
           options={{
            title:'Recent expenses',
@@ -41,15 +49,36 @@ function TabSelector(){
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'PRIMARY-FONT': require('./assets/fonts/NeueHaasDisplay-Mediu.ttf'),
+    'BOLD-FONT': require('./assets/fonts/NeueHaasDisplayBold.ttf'),
+    'ITALIC-FONT': require('./assets/fonts/NeueHaasDisplay-Mediu.ttf')
+});
+
+if(!fontsLoaded){
+  return <AppLoading />
+}
   return (
     <>
       <StatusBar style="auto" />
+      <ExpensesContext_Provider>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName='Bottom Tabs'>
-            <Stack.Screen name='Manage expense' component={Manage_Expense}/>
+          <Stack.Navigator 
+            initialRouteName='Bottom Tabs'
+            screenOptions={{
+              headerStyle:{
+                backgroundColor: GlobalStyles.COLORS.PRIMARY500},
+              headerTintColor:'white',
+            }}>
+            <Stack.Screen name='Manage expense' 
+              component={Manage_Expense}
+              options={{
+                presentation:'modal'
+              }}/>
             <Stack.Screen name='Bottom Tabs' component={TabSelector} options={{headerShown:false}}/>
           </Stack.Navigator>
         </NavigationContainer>
+      </ExpensesContext_Provider>  
       </>  
 
   );
