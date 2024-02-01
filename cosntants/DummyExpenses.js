@@ -32,19 +32,19 @@ export const DUMMY_EXPENSES = [
     {
         id:'6',
         description:'A pair of T-Shirts',
-        date: new Date('2024-01-09'),
+        date: new Date('2024-01-28'),
         amount: 920.03
     },
     {
         id:'7',
         description:'House Rent',
-        date: new Date('2024-01-10'),
+        date: new Date('2024-01-25'),
         amount: 550.70
     },
     {
         id:'8',
         description:'Medicines',
-        date: new Date('2024-01-10'),
+        date: new Date('2024-01-24'),
         amount: 390.10   
     },
     {
