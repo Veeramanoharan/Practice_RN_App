@@ -8,7 +8,6 @@ import All_Expenses from './screens/All_Expenses';
 import { GlobalStyles } from './cosntants/GlobalStyles';
 import { FontAwesome5 } from '@expo/vector-icons';
 import {useFonts} from 'expo-font';
-import AppLoading from 'expo-app-loading';
 import IconButton from './components/UI/IconButton';
 import ExpensesContext_Provider from './store/Expenses_Context';
 
@@ -56,7 +55,7 @@ export default function App() {
 });
 
 if(!fontsLoaded){
-  return <AppLoading />
+  return null;
 }
   return (
     <>

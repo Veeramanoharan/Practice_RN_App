@@ -1,32 +1,47 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { View,StyleSheet } from "react-native";
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../cosntants/GlobalStyles";
 import { Expenses_Context } from "../store/Expenses_Context";
 import ExpensesForm from "../components/ManageExpense/ExpensesForm";
+import { deleteExpense, postExpense, updateExpense } from "../util/API_Services";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import ErrorOverlay from "../components/UI/ErrorOverlay";
 
 
 function Manage_Expense({route,navigation}){
 
- const  expensesContext = useContext(Expenses_Context)
+ const [isSubmmitting,setIsSubmitting] = useState(false);   
+ const  expensesContext = useContext(Expenses_Context);
+ const [error,setError] = useState();
 
- const editedExpenseId = route.params?.expenseId
+ const editedExpenseId = route.params?.expenseId;
 
- const isEditing = !!editedExpenseId   //  double exclamation infront of a value
+ const isEditing = !!editedExpenseId;   //  double exclamation infront of a value
                                       //   convert it into a boolean in JS
+ 
  const selectedExpense = expensesContext.expenses.find(
     (expense) => expense.id === editedExpenseId)                                     
 
 
-        useLayoutEffect(() => {
-            navigation.setOptions({
-                title: isEditing ? 'Edit Expense' : 'Add Expense'
-            })
-        },[isEditing,navigation])
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            title: isEditing ? 'Edit Expense' : 'Add Expense'
+        })
+    },[isEditing,navigation]);
+
         
-        function deleteExpenseHandler(){
-            expensesContext.deleteExpense(editedExpenseId);
-            navigation.goBack();
+        async function deleteExpenseHandler(){
+            setIsSubmitting(true);
+            try{
+                expensesContext.deleteExpense(editedExpenseId);
+                await deleteExpense(editedExpenseId);
+                navigation.goBack();
+            }
+            catch(error){
+                setError('Could not delete the expense! Please try again later');
+                setIsSubmitting(false);
+            }
 
         }
         
@@ -35,16 +50,36 @@ function Manage_Expense({route,navigation}){
 
         }
 
-        function confirmHandler(expenseData){
-            if(isEditing){
-            expensesContext.updateExpense(
-                editedExpenseId, expenseData);
+        async function confirmHandler(expenseData){
+            setIsSubmitting(true);
+            try{
+                if(isEditing){
+                    expensesContext.updateExpense(
+                        editedExpenseId, expenseData);
+                     await updateExpense(editedExpenseId,expenseData);
+                }
+                else{
+                   const id = await postExpense(expenseData);
+                    expensesContext.addExpense({...expenseData, id: id});
+                }
+                navigation.goBack();
+            }
+            catch(error){
+                setError(`Couldn't save data! please try again later`);
+                setIsSubmitting(false);
+            }
+            
         }
-        else{
-            expensesContext.addExpense(expenseData);
-        }
-            navigation.goBack();
 
+
+        if(isSubmmitting){
+            return <LoadingSpinner />
+        }
+
+       
+
+        if(error && !isSubmmitting){
+            return <ErrorOverlay errorMessage={error} />
         }
 
     return(
